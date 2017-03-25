@@ -19,8 +19,8 @@ class YoloSolver(Solver):
     self.moment = float(solver_params['moment'])
     self.learning_rate = float(solver_params['learning_rate'])
     self.batch_size = int(common_params['batch_size'])
-    self.height = int(common_params['image_size'])
-    self.width = int(common_params['image_size'])
+    self.height = int(common_params['image_height'])
+    self.width = int(common_params['image_width'])
     self.max_objects = int(common_params['max_objects_per_image'])
     self.pretrain_path = str(solver_params['pretrain_model_path'])
     self.train_dir = str(solver_params['train_dir'])
@@ -44,7 +44,7 @@ class YoloSolver(Solver):
       train_op: op for training
     """
 
-    opt = tf.train.MomentumOptimizer(self.learning_rate, self.moment)
+    opt = tf.train.AdamOptimizer(self.learning_rate)
     grads = opt.compute_gradients(self.total_loss)
 
     apply_gradient_op = opt.apply_gradients(grads, global_step=self.global_step)
@@ -76,7 +76,8 @@ class YoloSolver(Solver):
     sess = tf.Session()
 
     sess.run(init)
-    saver1.restore(sess, self.pretrain_path)
+    if not self.pretrain_path == 'None':
+      saver1.restore(sess, self.pretrain_path)
 
 
     summary_writer = tf.summary.FileWriter(self.train_dir, sess.graph)
